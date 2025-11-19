@@ -90,20 +90,21 @@ def detect_column_type(values: list) -> str:
     if len(numeric_values) / len(non_null) < 0.9:
         return "categorical"
 
-    # Check for year/ID patterns (high uniqueness + small integers)
+    # Check column characteristics
     unique_ratio = len(set(numeric_values)) / len(numeric_values)
     all_integers = all(v == int(v) for v in numeric_values)
     max_value = max(numeric_values)
+    min_value = min(numeric_values)
 
-    # High uniqueness integers are likely IDs or years, but only if values are small
+    # Year detection: integers in typical year range (1900-2100)
+    # Years should always be categorical for grouping purposes
+    if all_integers and 1900 <= min_value and max_value <= 2100:
+        return "categorical"
+
+    # High uniqueness small integers are likely IDs
     # Large numbers (like population in millions) should be continuous
-    if unique_ratio > 0.5 and all_integers and max_value < 10000:
-        # Additional check: if values look like years (1900-2100)
-        if all(1900 <= v <= 2100 for v in numeric_values):
-            return "categorical"
-        # If very high uniqueness and small values, probably an ID
-        if unique_ratio > 0.9:
-            return "categorical"
+    if unique_ratio > 0.9 and all_integers and max_value < 10000:
+        return "categorical"
 
     return "continuous"
 
