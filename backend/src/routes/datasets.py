@@ -406,12 +406,13 @@ async def aggregate_dataset(
 
     # Build aggregation query using Postgres JSONB operators
     # This runs efficiently in the database
+    # Note: Column aliases must be quoted to preserve case (e.g., lifeExp_min not lifeexp_min)
     metric_selects = []
     for metric in request.metrics:
         metric_selects.extend([
-            f"MIN((row_data->>'{metric}')::numeric) as {metric}_min",
-            f"MAX((row_data->>'{metric}')::numeric) as {metric}_max",
-            f"AVG((row_data->>'{metric}')::numeric) as {metric}_avg"
+            f"MIN((row_data->>'{metric}')::numeric) as \"{metric}_min\"",
+            f"MAX((row_data->>'{metric}')::numeric) as \"{metric}_max\"",
+            f"AVG((row_data->>'{metric}')::numeric) as \"{metric}_avg\""
         ])
 
     query = f"""

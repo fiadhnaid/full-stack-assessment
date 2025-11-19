@@ -178,9 +178,10 @@ export default function DatasetView() {
     const minData = aggregationResults.map(r => r.aggregations[selectedMetric]?.min || 0);
     const maxData = aggregationResults.map(r => r.aggregations[selectedMetric]?.max || 0);
 
-    // Use line chart for year (temporal), bar chart otherwise
+    // Use line chart for year (temporal), column chart otherwise
+    // Note: 'column' = vertical bars (categorical on x-axis), 'bar' = horizontal bars
     const isYearGrouping = groupBy.toLowerCase().includes('year');
-    const chartType = isYearGrouping ? 'line' : 'bar';
+    const chartType = isYearGrouping ? 'line' : 'column';
 
     return {
       chart: { type: chartType },
