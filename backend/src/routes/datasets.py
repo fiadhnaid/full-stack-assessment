@@ -45,9 +45,15 @@ class DatasetDetail(BaseModel):
     data: list[dict]
 
 
+class FilterCondition(BaseModel):
+    column: str
+    value: str
+
+
 class AggregateRequest(BaseModel):
     group_by: str  # Column name to group by (categorical)
     metrics: list[str]  # Column names to aggregate (continuous)
+    filters: list[FilterCondition] = []  # Optional filters to apply before aggregating
 
 
 class AggregateResult(BaseModel):
@@ -407,6 +413,14 @@ async def aggregate_dataset(
                 detail=f"Column '{metric}' is not continuous and cannot be aggregated"
             )
 
+    # Validate filter columns exist
+    for f in request.filters:
+        if f.column not in column_map:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Filter column '{f.column}' not found in dataset"
+            )
+
     # Build aggregation query using Postgres JSONB operators
     # This runs efficiently in the database
     # Note: Column aliases must be quoted to preserve case (e.g., lifeExp_min not lifeexp_min)
@@ -418,20 +432,30 @@ async def aggregate_dataset(
             f"AVG((row_data->>'{metric}')::numeric) as \"{metric}_avg\""
         ])
 
+    # Build filter conditions
+    filter_conditions = []
+    query_params = {"dataset_id": dataset_id, "tenant_id": tenant_id}
+    for i, f in enumerate(request.filters):
+        param_name = f"filter_{i}"
+        filter_conditions.append(f"row_data->>'{f.column}' = :{param_name}")
+        query_params[param_name] = f.value
+
+    # Build WHERE clause
+    where_clause = "WHERE dataset_id = :dataset_id AND tenant_id = :tenant_id"
+    if filter_conditions:
+        where_clause += " AND " + " AND ".join(filter_conditions)
+
     query = f"""
         SELECT
             row_data->>'{request.group_by}' as group_value,
             {', '.join(metric_selects)}
         FROM dataset_rows
-        WHERE dataset_id = :dataset_id AND tenant_id = :tenant_id
+        {where_clause}
         GROUP BY row_data->>'{request.group_by}'
         ORDER BY group_value
     """
 
-    result = db.execute(
-        text(query),
-        {"dataset_id": dataset_id, "tenant_id": tenant_id}
-    )
+    result = db.execute(text(query), query_params)
 
     # Format results
     results = []

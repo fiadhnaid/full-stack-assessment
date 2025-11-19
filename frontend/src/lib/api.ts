@@ -102,6 +102,10 @@ export const uploadDataset = (file: File) => {
 export const getDataset = (id: string) => api.get(`/datasets/${id}`);
 export const aggregateDataset = (
   id: string,
-  data: { group_by: string; metrics: string[] }
+  data: {
+    group_by: string;
+    metrics: string[];
+    filters?: { column: string; value: string }[]
+  }
 ) => api.post(`/datasets/${id}/aggregate`, data);
 export const deleteDataset = (id: string) => api.delete(`/datasets/${id}`);

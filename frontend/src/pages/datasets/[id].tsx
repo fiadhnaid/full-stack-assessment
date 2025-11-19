@@ -70,6 +70,10 @@ export default function DatasetView() {
   const [isAggregating, setIsAggregating] = useState(false);
   const [showAggregation, setShowAggregation] = useState(false);
 
+  // Filter state for aggregation
+  const [filterColumn, setFilterColumn] = useState<string>('');
+  const [filterValue, setFilterValue] = useState<string>('');
+
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -107,9 +111,15 @@ export default function DatasetView() {
 
     setIsAggregating(true);
     try {
+      // Build filters array if filter is selected
+      const filters = filterColumn && filterValue
+        ? [{ column: filterColumn, value: filterValue }]
+        : [];
+
       const response = await aggregateDataset(id as string, {
         group_by: groupBy,
         metrics: [selectedMetric],
+        filters,
       });
       setAggregationResults(response.data.results);
       setShowAggregation(true);
@@ -130,6 +140,15 @@ export default function DatasetView() {
     dataset?.columns.filter(c => c.type === 'continuous') || [],
     [dataset]
   );
+
+  // Get unique values for the selected filter column
+  const filterValues = useMemo(() => {
+    if (!filterColumn || !dataset) return [];
+    const values = dataset.data
+      .map(row => row[filterColumn])
+      .filter(v => v !== null && v !== undefined && v !== '');
+    return [...new Set(values)].sort();
+  }, [filterColumn, dataset]);
 
   // Table columns configuration
   const columns = useMemo(() => {
@@ -269,6 +288,32 @@ export default function DatasetView() {
                 ))}
               </select>
             </div>
+            <div className={styles.controlGroup}>
+              <label>Filter by:</label>
+              <select
+                value={filterColumn}
+                onChange={(e) => {
+                  setFilterColumn(e.target.value);
+                  setFilterValue(''); // Reset value when column changes
+                }}
+              >
+                <option value="">No filter</option>
+                {categoricalColumns.map(col => (
+                  <option key={col.name} value={col.name}>{col.name}</option>
+                ))}
+              </select>
+            </div>
+            {filterColumn && (
+              <div className={styles.controlGroup}>
+                <label>Value:</label>
+                <select value={filterValue} onChange={(e) => setFilterValue(e.target.value)}>
+                  <option value="">Select value</option>
+                  {filterValues.map(val => (
+                    <option key={String(val)} value={String(val)}>{String(val)}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <button
               onClick={fetchAggregation}
               disabled={isAggregating || !groupBy || !selectedMetric}
