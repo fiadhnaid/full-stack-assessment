@@ -37,8 +37,11 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // If 401 and not already retrying, try to refresh token
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't retry for auth endpoints (prevents infinite loop)
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/');
+
+    // If 401 and not already retrying and not an auth endpoint, try to refresh token
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
 
       try {
@@ -58,7 +61,10 @@ api.interceptors.response.use(
       } catch (refreshError) {
         // Refresh failed, user needs to login again
         setAccessToken(null);
-        window.location.href = '/login';
+        // Only redirect if not already on login page
+        if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
         return Promise.reject(refreshError);
       }
     }

@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-pydantic
+pydantic[email]
 pandas
 sqlalchemy
 psycopg2-binary
