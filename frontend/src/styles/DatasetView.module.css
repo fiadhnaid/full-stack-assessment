@@ -237,6 +237,26 @@
   color: #555;
 }
 
+/* Column Filters */
+.filterRow th {
+  padding: 4px 12px 10px;
+  background: #f8f8f8;
+}
+
+.columnFilter {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.columnFilter:focus {
+  outline: none;
+  border-color: #0070f3;
+}
+
 /* Pagination */
 .pagination {
   display: flex;

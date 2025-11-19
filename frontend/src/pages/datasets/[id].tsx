@@ -354,6 +354,21 @@ export default function DatasetView() {
                     ))}
                   </tr>
                 ))}
+                {/* Column filter inputs */}
+                <tr className={styles.filterRow}>
+                  {table.getHeaderGroups()[0]?.headers.map(header => (
+                    <th key={header.id}>
+                      <input
+                        type="text"
+                        placeholder={`Filter...`}
+                        value={(header.column.getFilterValue() as string) ?? ''}
+                        onChange={(e) => header.column.setFilterValue(e.target.value)}
+                        className={styles.columnFilter}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </th>
+                  ))}
+                </tr>
               </thead>
               <tbody>
                 {table.getRowModel().rows.map(row => (
