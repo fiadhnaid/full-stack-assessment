@@ -54,6 +54,7 @@ This project provides a Docker Compose setup for a full-stack application. It ha
 ```bash
 docker-compose up --build
 ```
+docker-compose logs -f backend
 
 5. Access the applications:
    - FastAPI Backend: http://localhost:8000

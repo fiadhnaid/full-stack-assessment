@@ -1,0 +1,280 @@
+/* Dataset view page styles */
+
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #666;
+}
+
+.error {
+  padding: 16px;
+  background: #fee;
+  color: #c00;
+  border-radius: 4px;
+  margin: 24px;
+}
+
+.header {
+  background: white;
+  padding: 16px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+  flex: 1;
+}
+
+.meta {
+  font-size: 14px;
+  color: #666;
+}
+
+.backButton {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.backButton:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.main {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Aggregation Section */
+.aggregationSection {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.aggregationSection h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: #333;
+}
+
+.aggregationControls {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.controlGroup label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.controlGroup select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+.aggregateButton {
+  background: #0070f3;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.aggregateButton:hover {
+  background: #0060df;
+}
+
+.aggregateButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Chart Section */
+.chartSection {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.chartSection h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: #333;
+}
+
+.chartContainer {
+  min-height: 400px;
+}
+
+/* Aggregation Results Section */
+.aggregationResultsSection {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.aggregationResultsSection h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: #333;
+}
+
+/* Data Section */
+.dataSection {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dataSection h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+  color: #333;
+}
+
+/* Table Controls */
+.tableControls {
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #0070f3;
+}
+
+/* Table */
+.tableWrapper {
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.table th {
+  background: #f8f8f8;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.table th.sortable:hover {
+  background: #f0f0f0;
+}
+
+.table tbody tr:hover {
+  background: #fafafa;
+}
+
+.table td {
+  color: #555;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 14px;
+  color: #666;
+  padding: 0 8px;
+}
+
+.pagination select {
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-left: auto;
+}
