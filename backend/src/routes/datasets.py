@@ -4,6 +4,7 @@ Dataset routes for uploading, listing, viewing, and aggregating CSV data.
 
 import csv
 import io
+import re
 from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
@@ -15,6 +16,41 @@ from src.database import get_db, get_db_with_tenant
 from src.models import Dataset, DatasetRow, Tenant
 from src.auth import get_current_user
 from src.config import MAX_FILE_SIZE_BYTES
+
+
+def sanitize_identifier(name: str) -> str:
+    """
+    Sanitize a column name to prevent SQL injection.
+    Only allows alphanumeric characters and underscores.
+    Raises ValueError if the name contains invalid characters.
+    """
+    if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', name):
+        raise ValueError(f"Invalid identifier: {name}")
+    return name
+
+
+def validate_column_name(name: str, valid_columns: list[str], field_type: str = "Column") -> str:
+    """
+    Validate that a column name is safe and exists in the dataset.
+    This provides defense in depth: sanitization + whitelist validation.
+    """
+    # First sanitize the identifier
+    try:
+        sanitize_identifier(name)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{field_type} name '{name}' contains invalid characters"
+        )
+
+    # Then check it exists in valid columns (whitelist)
+    if name not in valid_columns:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"{field_type} '{name}' not found in dataset"
+        )
+
+    return name
 
 router = APIRouter(prefix="/datasets", tags=["Datasets"])
 
@@ -385,14 +421,12 @@ async def aggregate_dataset(
             detail="Dataset not found"
         )
 
-    # Validate group_by column exists and is categorical
+    # Build column map and valid column list for validation
     column_map = {c["name"]: c["type"] for c in dataset.columns}
+    valid_columns = list(column_map.keys())
 
-    if request.group_by not in column_map:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Column '{request.group_by}' not found in dataset"
-        )
+    # Validate and sanitize group_by column (prevents SQL injection)
+    validate_column_name(request.group_by, valid_columns, "Group by column")
 
     if column_map[request.group_by] != "categorical":
         raise HTTPException(
@@ -400,26 +434,18 @@ async def aggregate_dataset(
             detail=f"Column '{request.group_by}' is not categorical and cannot be used for grouping"
         )
 
-    # Validate metric columns exist and are continuous
+    # Validate and sanitize metric columns
     for metric in request.metrics:
-        if metric not in column_map:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Column '{metric}' not found in dataset"
-            )
+        validate_column_name(metric, valid_columns, "Metric column")
         if column_map[metric] != "continuous":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Column '{metric}' is not continuous and cannot be aggregated"
             )
 
-    # Validate filter columns exist
+    # Validate and sanitize filter columns
     for f in request.filters:
-        if f.column not in column_map:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Filter column '{f.column}' not found in dataset"
-            )
+        validate_column_name(f.column, valid_columns, "Filter column")
 
     # Build aggregation query using Postgres JSONB operators
     # This runs efficiently in the database
